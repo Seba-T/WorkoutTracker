@@ -6,7 +6,10 @@
   "scripts": {
     "start": "node -r dotenv/config dist/index.js",
     "build": "tsc -p ./src/tsconfig.json",
-    "test": "npx nodemon -r dotenv/config src/index.ts"
+    "postinstall": "npm run build",
+    "deploy": "git checkout heroku_production && git add . && git commit -m Heroku && git push heroku heroku_production:master",
+    "test": "npx nodemon -r dotenv/config src/index.ts",
+    "testjs": "npm run build && npm run start"
   },
   "author": "Sebastiano Tocci",
   "type": "module",

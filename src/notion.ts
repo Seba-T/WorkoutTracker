@@ -61,8 +61,8 @@ export class Notion {
     const allAreChecked = this.checkIfAllAreChecked(pages);
     if (allAreChecked) this.uncheckAllCheckboxes();
     const pagesToUpdate = await this.getPagesToUpdate(pages);
-    this.syncPagesToDb(pagesToUpdate);
-    //this.updateAllModifiedDates(pagesToUpdate);
+    this.syncModifiedPagesToDb(pagesToUpdate);
+    this.updateAllModifiedDates(pagesToUpdate);
   }
 
   /**
@@ -125,7 +125,7 @@ export class Notion {
    * @param pages
    */
 
-  private async syncPagesToDb(pages: Array<ExerciseDataObject>) {
+  private async syncModifiedPagesToDb(pages: Array<ExerciseDataObject>) {
     for (const page of pages) {
       this._mongoUtils.updateOrCreateExerciseData(page.description, {
         date: new Date(),
@@ -147,21 +147,21 @@ export class Notion {
   private async getPagesToUpdate(pages: Array<PageObjectResponse>) {
     const pagesToUpdate = new Array<ExerciseDataObject>();
     for (const page of pages) {
-      const props = this.getLightweightPage(page);
+      const lightPage = this.getLightweightPage(page);
 
-      this._mongoUtils
-        .retrieveLatestMeasurement(props.description)
-        .then((lastMeasurement) => {
-          if (
-            lastMeasurement !== undefined &&
-            lastMeasurement !== 0 &&
-            props.measurement !== lastMeasurement
-          ) {
-            pagesToUpdate.push(props);
-          }
-        });
+      const lastMeasurement = await this._mongoUtils.retrieveLatestMeasurement(
+        lightPage.description
+      );
+
+      if (
+        lastMeasurement !== undefined &&
+        lastMeasurement !== 0 &&
+        lastMeasurement !== lightPage.measurement
+      ) {
+        pagesToUpdate.push(lightPage);
+      }
     }
-
+    console.log(pagesToUpdate);
     return pagesToUpdate;
   }
 
@@ -204,6 +204,7 @@ export class Notion {
 
   private updateAllModifiedDates(pages: Array<ExerciseDataObject>) {
     for (const page of pages) {
+      console.log(page);
       this._notion.pages.update({
         page_id: page.id,
         properties: {
