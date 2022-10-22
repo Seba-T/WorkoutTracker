@@ -1,0 +1,5 @@
+node_modules
+.env
+security
+dist/*
+!dist/.gitkeep 
