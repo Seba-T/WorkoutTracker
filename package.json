@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "A notion integration database to help you track your workouts",
   "main": "src/index.ts",
+  "engines": {
+    "node": "16.18.0"
+  },
   "scripts": {
     "start": "node -r dotenv/config dist/index.js",
     "build": "tsc -p ./src/tsconfig.json",
