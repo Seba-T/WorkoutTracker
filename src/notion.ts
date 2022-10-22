@@ -70,7 +70,7 @@ export class Notion {
       if (pagesToUpdate.length === 0) console.log("No pages to update!");
 
       await Promise.all(this.syncModifiedPagesToDb(pagesToUpdate));
-      //await Promise.all(this.updateAllModifiedDates(pagesToUpdate));
+      await Promise.all(this.updateAllModifiedDates(pagesToUpdate));
       return true;
     } catch (err) {
       throw err;
