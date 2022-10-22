@@ -1,4 +1,7 @@
-import { PageObjectResponse } from "@notionhq/client/build/src/api-endpoints";
+import {
+  PageObjectResponse,
+  UpdatePageResponse,
+} from "@notionhq/client/build/src/api-endpoints";
 
 import { comesAfter } from "./utils.js";
 
@@ -57,12 +60,21 @@ export class Notion {
    */
 
   public async syncUpdates() {
-    const pages = await this.getAllPagesAsPageObject();
-    const allAreChecked = this.checkIfAllAreChecked(pages);
-    if (allAreChecked) this.uncheckAllCheckboxes();
-    const pagesToUpdate = await this.getPagesToUpdate(pages);
-    this.syncModifiedPagesToDb(pagesToUpdate);
-    this.updateAllModifiedDates(pagesToUpdate);
+    try {
+      await this.Ready;
+      const pages = await this.getAllPagesAsPageObject();
+      const allAreChecked = this.checkIfAllAreChecked(pages);
+      if (allAreChecked) this.uncheckAllCheckboxes();
+      const pagesToUpdate = await this.getPagesToUpdate(pages);
+
+      if (pagesToUpdate.length === 0) console.log("No pages to update!");
+
+      await Promise.all(this.syncModifiedPagesToDb(pagesToUpdate));
+      //await Promise.all(this.updateAllModifiedDates(pagesToUpdate));
+      return true;
+    } catch (err) {
+      throw err;
+    }
   }
 
   /**
@@ -84,10 +96,10 @@ export class Notion {
     if (isFullBlock(block)) {
       this._editedTime = new Date(block.last_edited_time);
 
-      const data = await this._mongoUtils.retrieveCachedPageIds();
+      const cachedPageIds = await this._mongoUtils.retrieveCachedPageIds();
       this._cachedPageIds =
-        data !== undefined
-          ? data
+        cachedPageIds !== undefined
+          ? cachedPageIds
           : { date: new Date(), pageIds: new Array<string>() };
 
       if (comesAfter(this._editedTime, this._cachedPageIds.date)) {
@@ -125,13 +137,15 @@ export class Notion {
    * @param pages
    */
 
-  private async syncModifiedPagesToDb(pages: Array<ExerciseDataObject>) {
-    for (const page of pages) {
+  private syncModifiedPagesToDb(
+    pages: Array<ExerciseDataObject>
+  ): Promise<any>[] {
+    return pages.map((page) =>
       this._mongoUtils.updateOrCreateExerciseData(page.description, {
         date: new Date(),
         value: page.measurement,
-      });
-    }
+      })
+    );
   }
 
   /**
@@ -154,14 +168,16 @@ export class Notion {
       );
 
       if (
-        lastMeasurement !== undefined &&
-        lastMeasurement !== 0 &&
-        lastMeasurement !== lightPage.measurement
-      ) {
+        lastMeasurement === undefined ||
+        (lastMeasurement !== undefined &&
+          lastMeasurement !== 0 &&
+          lastMeasurement !== lightPage.measurement)
+      )
         pagesToUpdate.push(lightPage);
-      }
+
+      //pagesToUpdate.push(lightPage);
     }
-    console.log(pagesToUpdate);
+    //console.log(pagesToUpdate);
     return pagesToUpdate;
   }
 
@@ -200,11 +216,13 @@ export class Notion {
   /**
    *
    * @param pages
+   * @returns Promise<UpdatePageResponse>[]
    */
 
-  private updateAllModifiedDates(pages: Array<ExerciseDataObject>) {
-    for (const page of pages) {
-      console.log(page);
+  private updateAllModifiedDates(
+    pages: Array<ExerciseDataObject>
+  ): Promise<UpdatePageResponse>[] {
+    return pages.map((page) =>
       this._notion.pages.update({
         page_id: page.id,
         properties: {
@@ -212,8 +230,8 @@ export class Notion {
             date: { start: new Date().toISOString().split("T")[0] },
           },
         },
-      });
-    }
+      })
+    );
   }
 
   /**

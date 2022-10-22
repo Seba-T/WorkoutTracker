@@ -65,37 +65,33 @@ export class MongoUtils {
   public async updateOrCreateExerciseData(
     description: string,
     measurement: Measurement
-  ) {
+  ): Promise<any> {
     description = description.trim();
-    this._ExerciseData.findOne(
-      { description },
-      (
-        err: any,
-        doc: {
-          measurements: Array<Measurement>;
-        }
-      ) => {
-        if (err) return err;
-        if (doc === null) {
-          //we insert a new record altogether
-          const newRecord = new this._ExerciseData({
-            description,
-            measurements: [measurement],
-            lastUpdatedDate: new Date(),
-          });
-          newRecord.save();
-        } else {
-          //we update the existing one
-          this._ExerciseData.updateOne(
-            { description },
-            {
-              measurements: doc.measurements.push(measurement),
+    return this._ExerciseData
+      .findOne({ description })
+      .exec()
+      .then(
+        async (doc) => {
+          if (doc === null) {
+            //we insert a new record altogether
+            const newRecord = new this._ExerciseData({
+              description,
+              measurements: [measurement],
               lastUpdatedDate: new Date(),
-            }
-          );
-        }
-      }
-    );
+            });
+            await newRecord.save({ j: true });
+          } else {
+            Object.assign(doc, { lastUpdatedDate: new Date(), isNew: false });
+            doc.measurements.push(measurement);
+
+            // console.log(doc.directModifiedPaths());
+            await doc.save({ j: true });
+            //we update the existing one
+          }
+          return true;
+        },
+        (err) => err
+      );
   }
 
   /**

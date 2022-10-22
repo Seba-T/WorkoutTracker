@@ -7,6 +7,10 @@ const notion = new Notion(
   process.env.MONGODB_URL as string
 );
 
-notion.Ready.then(() => {
-  notion.syncUpdates();
-});
+try {
+  await notion.syncUpdates();
+  console.log("Successfully synched updates, exiting with code 0...");
+  process.exit(0);
+} catch (e) {
+  throw e;
+}
