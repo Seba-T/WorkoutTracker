@@ -141,7 +141,7 @@ export class Notion {
     pages: Array<ExerciseDataObject>
   ): Promise<any>[] {
     return pages.map((page) =>
-      this._mongoUtils.updateOrCreateExerciseData(page.description, {
+      this._mongoUtils.updateOrCreateExerciseData(page.id, page.description, {
         date: new Date(),
         value: page.measurement,
       })
@@ -164,7 +164,7 @@ export class Notion {
       const lightPage = this.getLightweightPage(page);
 
       const lastMeasurement = await this._mongoUtils.retrieveLatestMeasurement(
-        lightPage.description
+        lightPage.id
       );
 
       if (

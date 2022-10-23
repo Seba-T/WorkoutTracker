@@ -17,6 +17,7 @@ export class MongoUtils {
       value: Number,
     });
     const exerciseData = new this._mongoose.Schema({
+      page_id: { type: String, required: true },
       description: { type: String, required: true },
       measurements: { type: [mongoMeasurement], required: true },
       lastUpdatedDate: { type: Date, required: true },
@@ -47,26 +48,14 @@ export class MongoUtils {
    * updateOrCreateExerciseData
    */
 
-  public getLastEditedDate(description: string): Promise<Date | undefined> {
-    description = description.trim();
-    return this._ExerciseData
-      .findOne({ description })
-      .exec()
-      .then(
-        (suc) => {
-          if (suc !== null) return suc?.lastUpdatedDate;
-          else return undefined;
-        },
-        (err) => err
-      );
-  }
   public async updateOrCreateExerciseData(
+    page_id: string,
     description: string,
     measurement: Measurement
   ): Promise<any> {
-    description = description.trim();
+    page_id = page_id.trim();
     return this._ExerciseData
-      .findOne({ description })
+      .findOne({ page_id })
       .exec()
       .then(
         async (doc) => {
@@ -74,6 +63,7 @@ export class MongoUtils {
             //we insert a new record altogether
             const newRecord = new this._ExerciseData({
               description,
+              page_id,
               measurements: [measurement],
               lastUpdatedDate: new Date(),
             });
@@ -96,11 +86,11 @@ export class MongoUtils {
    * retrieveLatestMeasurement
    */
   public async retrieveLatestMeasurement(
-    description: string
+    page_id: string
   ): Promise<number | undefined> {
-    description = description.trim();
+    page_id = page_id.trim();
     return this._ExerciseData
-      .findOne({ description })
+      .findOne({ page_id })
       .exec()
       .then(
         (data) => {
