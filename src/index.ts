@@ -1,10 +1,12 @@
 import { Notion } from "./notion.js";
 // Initializing a client
 
+const MONGODB_URL = `mongodb+srv://${process.env.MONGODB_USR}:${process.env.MONGODB_PW}${process.env.MONGODB_URL}`;
+
 const notion = new Notion(
   process.env.NOTION_TOKEN as string,
   process.env.PAGE_ID as string,
-  process.env.MONGODB_URL as string
+  MONGODB_URL
 );
 
 try {
