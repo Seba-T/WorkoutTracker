@@ -35,8 +35,6 @@ export class MongoUtils {
     this.Ready = new Promise(async (resolve, reject) => {
       try {
         await this._mongoose.connect(mongodbUrl, {
-          sslKey: caFileBuf,
-          sslCert: caFileBuf,
           dbName: "Prod",
         });
         resolve(true);
