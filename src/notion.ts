@@ -170,7 +170,6 @@ export class Notion {
       if (
         lastMeasurement === undefined ||
         (lastMeasurement !== undefined &&
-          lastMeasurement !== 0 &&
           lastMeasurement !== lightPage.measurement)
       )
         pagesToUpdate.push(lightPage);
