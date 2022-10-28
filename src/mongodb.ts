@@ -8,6 +8,7 @@ export class MongoUtils {
   private _mongoose: Mongoose;
   private _ExerciseData;
   private _PageIdsCachedData;
+  private _StrikeRecord;
   public Ready: Promise<boolean>;
 
   constructor(mongodbUrl: string) {
@@ -26,6 +27,12 @@ export class MongoUtils {
       date: { type: Date, required: true },
       pageIds: { type: Array<string>, required: true },
     });
+
+    const strikeRecord = new this._mongoose.Schema({
+      strikeDate: { type: Date, required: true },
+    });
+
+    this._StrikeRecord = this._mongoose.model("StrikeRecord", strikeRecord);
 
     this._ExerciseData = this._mongoose.model("ExerciseData", exerciseData);
     this._PageIdsCachedData = this._mongoose.model(
@@ -47,6 +54,10 @@ export class MongoUtils {
   /**
    * updateOrCreateExerciseData
    */
+  public async saveStrikeRecord() {
+    const strikeRecord = new this._StrikeRecord({ strikeDate: new Date() });
+    strikeRecord.save();
+  }
 
   public async updateOrCreateExerciseData(
     page_id: string,

@@ -64,7 +64,10 @@ export class Notion {
       await this.Ready;
       const pages = await this.getAllPagesAsPageObject();
       const allAreChecked = this.checkIfAllAreChecked(pages);
-      if (allAreChecked) this.uncheckAllCheckboxes();
+      if (allAreChecked) {
+        this.uncheckAllCheckboxes();
+        this._mongoUtils.saveStrikeRecord();
+      }
       const pagesToUpdate = await this.getPagesToUpdate(pages);
 
       if (pagesToUpdate.length === 0) console.log("No pages to update!");
