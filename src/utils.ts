@@ -9,7 +9,9 @@ export function comesAfter(
   first: Date | undefined,
   second: Date | undefined
 ): boolean {
-  return first === undefined || second === undefined
-    ? false
-    : first.getTime() > second.getTime();
+  return (
+    first === undefined ||
+    second === undefined ||
+    first.getTime() > second.getTime()
+  );
 }

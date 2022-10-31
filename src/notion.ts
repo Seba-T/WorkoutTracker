@@ -100,13 +100,10 @@ export class Notion {
       this._editedTime = new Date(block.last_edited_time);
 
       const cachedPageIds = await this._mongoUtils.retrieveCachedPageIds();
-      this._cachedPageIds =
-        cachedPageIds !== undefined
-          ? cachedPageIds
-          : { date: new Date(), pageIds: new Array<string>() };
 
-      if (comesAfter(this._editedTime, this._cachedPageIds.date)) {
-        //we check that the caching is older than the latest update!
+      if (comesAfter(this._editedTime, this._cachedPageIds?.date)) {
+        //we check that the caching is older than the latest update
+        //or that no caching exists at all!
         const newCache: CachedData = {
           date: new Date(),
           pageIds: new Array<string>(),
@@ -118,7 +115,7 @@ export class Notion {
 
         this._mongoUtils.updateCachedData(newCache);
         this._cachedPageIds = newCache;
-      }
+      } else this._cachedPageIds = cachedPageIds;
       return true;
     }
   }
