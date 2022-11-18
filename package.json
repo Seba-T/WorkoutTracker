@@ -7,7 +7,7 @@
     "node": "16.18.0"
   },
   "scripts": {
-    "start": "pm2-runtime start ecosystem.config.js --env production",
+    "start": "pm2-runtime start ecosystem.config.cjs --env production",
     "build": "tsc -p ./src/tsconfig.json",
     "postinstall": "npm run build",
     "deploy": "git checkout heroku_production && git add . && git commit -m Heroku && git push heroku heroku_production:master",
